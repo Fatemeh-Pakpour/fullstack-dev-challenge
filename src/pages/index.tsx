@@ -1,3 +1,4 @@
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import Head from "next/head";
@@ -14,21 +15,38 @@ import { fetchData } from "~/utils";
 import type { ReturnType } from "./api/voyage/getAll";
 import { Button } from "~/components/ui/button";
 import { TABLE_DATE_FORMAT } from "~/constants";
+import { useToast } from "~/components/ui/use-toast";
+import { CustomPopover } from "~/components/customPopover";
+
 
 export default function Home() {
   const { data: voyages } = useQuery<ReturnType>(["voyages"], () =>
     fetchData("voyage/getAll")
   );
-  console.log("khar  &gV");
+  const { toast } = useToast();
+
   const queryClient = useQueryClient();
   const mutation = useMutation(
     async (voyageId: string) => {
-      const response = await fetch(`/api/voyage/delete?id=${voyageId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete the voyage");
+      try {
+        const response = await fetch(`/api/voyage/delete?id=${voyageId}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Delete Failed.",
+            description: "Please try again.",
+          });
+          throw new Error("Failed to delete the voyage");
+        }
+      } catch (error) {
+        console.error("API request failed:", error);
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "Please try again later.",
+        });
       }
     },
     {
@@ -57,6 +75,7 @@ export default function Home() {
               <TableHead>Port of loading</TableHead>
               <TableHead>Port of discharge</TableHead>
               <TableHead>Vessel</TableHead>
+              <TableHead>UnitTypes</TableHead>
               <TableHead>&nbsp;</TableHead>
             </TableRow>
           </TableHeader>
@@ -76,6 +95,9 @@ export default function Home() {
                 <TableCell>{voyage.portOfDischarge}</TableCell>
                 <TableCell>{voyage.vessel.name}</TableCell>
                 <TableCell>
+                  <CustomPopover unitTypes={voyage.unitTypes} />
+                </TableCell>
+                <TableCell>
                   <Button
                     onClick={() => handleDelete(voyage.id)}
                     variant="outline"
@@ -91,3 +113,4 @@ export default function Home() {
     </>
   );
 }
+
