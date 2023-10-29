@@ -19,7 +19,7 @@ export default function Home() {
   const { data: voyages } = useQuery<ReturnType>(["voyages"], () =>
     fetchData("voyage/getAll")
   );
-  console.log("khar");
+  console.log("khar  &gV");
   const queryClient = useQueryClient();
   const mutation = useMutation(
     async (voyageId: string) => {
