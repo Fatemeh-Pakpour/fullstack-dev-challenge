@@ -23,13 +23,13 @@ const CustomPopover: FC<CustomPopoverProps> = memo(({ unitTypes }) => {
                 <div>
                     <div className="grid grid-cols-2 font-medium">
                         <p>Name</p>
-                        <p>Length</p>
-                        <hr className="w-40 my-2 bg-slate-400" />
+                        <p className="justify-self-center" >Length</p>
+                        <hr className="w-48 my-2 bg-slate-400" />
                     </div>
                     {unitTypes.map((unitType, index) =>
-                        <div key={index} className="grid grid-cols-2" >
+                        <div key={index} className="grid grid-cols-2 text-xs" >
                             <p>{unitType?.name}</p>
-                            <p>{unitType?.defaultLength}</p>
+                            <p className="justify-self-center">{unitType?.defaultLength}</p>
                         </div>
                     )}
 

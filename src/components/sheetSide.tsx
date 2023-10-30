@@ -50,7 +50,6 @@ export function SheetSide() {
                 setError(isBefore);
                 try {
                     if (!error) {
-                        console.log("inside try");
                         const response = await fetch('/api/voyage/create', {
                             method: "POST",
                             headers: {
