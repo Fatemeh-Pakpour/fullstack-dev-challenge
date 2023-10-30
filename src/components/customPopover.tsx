@@ -28,8 +28,8 @@ const CustomPopover: FC<CustomPopoverProps> = memo(({ unitTypes }) => {
                     </div>
                     {unitTypes.map((unitType, index) =>
                         <div key={index} className="grid grid-cols-2" >
-                            <p>{unitType.name}</p>
-                            <p>{unitType.defaultLength}</p>
+                            <p>{unitType?.name}</p>
+                            <p>{unitType?.defaultLength}</p>
                         </div>
                     )}
 

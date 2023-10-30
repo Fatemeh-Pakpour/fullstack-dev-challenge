@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -21,7 +21,6 @@ import { type VesselsType } from "~/pages/api/vessel/getAll";
 
 
 export function SheetSide() {
-
     const formSchema = z.object({
         departure: z.string(),
         arrival: z.string(),
@@ -29,53 +28,70 @@ export function SheetSide() {
         portOfDischarge: z.string(),
         vessel: z.string(),
     });
-    const [error, setError] = useState<boolean>(false)
+    const [error, setError] = useState<boolean>(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema)
     });
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        setError(moment(values.arrival).isBefore(values.departure));
-        if (error) {
-            return;
+    useEffect(() => {
+        const departure = form.getValues("departure");
+        const arrival = form.getValues("arrival");
+        if (arrival && departure) {
+            setError(moment(arrival).isBefore(departure));
         }
-        try {
-            const response = await fetch('/api/voyage/create', {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body:
-                    JSON.stringify({
-                        portOfLoading: values.portOfLoading,
-                        portOfDischarge: values.portOfDischarge,
-                        scheduledArrival: moment(values.arrival).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
-                        scheduledDeparture: moment(values.departure).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
-                        vesselId: values.vessel,
-                    }),
-            });
-            if (!response.ok) {
-                toast({
-                    variant: "destructive",
-                    title: "Request error.",
-                    description: "Please try again",
-                })
-                throw new Error('An error occurred');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [error, form.getValues("departure"), form.getValues("arrival")]);
+
+
+    const mutation =
+        useMutation(
+            async (values: z.infer<typeof formSchema>) => {
+                const isBefore = moment(values.arrival).isBefore(values.departure);
+                setError(isBefore);
+                try {
+                    if (!error) {
+                        console.log("inside try");
+                        const response = await fetch('/api/voyage/create', {
+                            method: "POST",
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body:
+                                JSON.stringify({
+                                    portOfLoading: values.portOfLoading,
+                                    portOfDischarge: values.portOfDischarge,
+                                    scheduledArrival: moment(values.arrival).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+                                    scheduledDeparture: moment(values.departure).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+                                    vesselId: values.vessel,
+                                }),
+                        });
+                        if (!response.ok) {
+                            toast({
+                                variant: "destructive",
+                                title: "Request error.",
+                                description: "Please try again",
+                            })
+                            throw new Error('An error occurred');
+                        }
+                        else {
+                            toast({
+                                title: "Registration successful.",
+                                description: "Data received successfully",
+                            })
+                        }
+                        form.reset();
+                    }
+                } catch (error) {
+                    toast({
+                        variant: "destructive",
+                        title: "Network error.",
+                        description: "Please try again.",
+                    })
+                }
             }
-            else {
-                toast({
-                    title: "Registration successful.",
-                    description: "Data received successfully",
-                })
-            }
-        } catch (error) {
-            toast({
-                variant: "destructive",
-                title: "Network error.",
-                description: "Please try again.",
-            })
-        }
-        form.reset();
+        );
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        mutation.mutate(values);
     }
 
     const { data: vessels } = useQuery<VesselsType>(["vessels"], () =>
@@ -83,12 +99,12 @@ export function SheetSide() {
     );
 
     return (
-        <div className="grid gap-4 pl-4 lg:pl-8 md:justify-items-start lg:justify-items-center  lg:grid-cols-7">
+        <div className="grid gap-4 pl-4 lg:pl-8 md:justify-items-start lg:justify-items-center lg:grid-cols-7">
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="outline" className="bg-white text-black mt-4 w-min col-start-1 col-end-3">Create</Button>
                 </SheetTrigger>
-                <SheetContent side="right">
+                <SheetContent side="right" className="bg-slate-600 overflow-y-auto">
                     <SheetHeader className="mb-8">
                         <SheetTitle className="mb-2">Add a voyage</SheetTitle>
                         <SheetDescription>
@@ -104,7 +120,7 @@ export function SheetSide() {
                                     <FormItem>
                                         <FormLabel>Departure</FormLabel>
                                         <FormControl>
-                                            <Input type="date" placeholder="Departure"
+                                            <Input type="date"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -120,7 +136,7 @@ export function SheetSide() {
                                     <FormItem>
                                         <FormLabel>Arrival</FormLabel>
                                         <FormControl>
-                                            <Input type="date" placeholder="Arrival" {...field}
+                                            <Input type="date" {...field}
                                             />
                                         </FormControl>
                                         <FormMessage />

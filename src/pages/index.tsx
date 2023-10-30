@@ -95,7 +95,7 @@ export default function Home() {
                 <TableCell>{voyage.portOfDischarge}</TableCell>
                 <TableCell>{voyage.vessel.name}</TableCell>
                 <TableCell>
-                  <CustomPopover unitTypes={voyage.unitTypes} />
+                  <CustomPopover unitTypes={voyage?.unitTypes} />
                 </TableCell>
                 <TableCell>
                   <Button
