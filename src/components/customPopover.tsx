@@ -8,6 +8,10 @@ interface CustomPopoverProps {
 }
 
 const CustomPopover: FC<CustomPopoverProps> = memo(({ unitTypes }) => {
+    if (!unitTypes?.length) {
+        return <div>-</div>
+    }
+
     return (
         <Popover>
             <PopoverTrigger asChild >
