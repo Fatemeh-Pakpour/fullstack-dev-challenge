@@ -101,7 +101,7 @@ export function SheetSide() {
         <div className="grid gap-4 pl-4 lg:pl-8 md:justify-items-start lg:justify-items-center lg:grid-cols-7">
             <Sheet>
                 <SheetTrigger asChild>
-                    <Button variant="outline" className="bg-white text-black mt-4 w-min col-start-1 col-end-3">Create</Button>
+                    <Button variant="outline" className="bg-white text-black my-4 w-min col-start-1 col-end-3">Create</Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="bg-slate-600 overflow-y-auto">
                     <SheetHeader className="mb-8">
